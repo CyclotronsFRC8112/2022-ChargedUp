@@ -4,6 +4,8 @@
 
 package frc8112.robot;
 
+import edu.wpi.first.wpilibj.DigitalSource;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,5 +17,18 @@ package frc8112.robot;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+  }
+
+  public static class DriveConstants {
+    public static final int kLeftMotor1Port = 0;
+    public static final int kLeftMotor2Port = 1;
+
+    public static final int kRightMotor1Port = 3;
+    public static final int kRightMotor2Port = 4;
+    public static final DigitalSource kLeftEncoderReversed = null;
+    public static final DigitalSource[] kLeftEncoderPorts = null;
+    public static final DigitalSource[] kRightEncoderPorts = null;
+    public static final double kEncoderDistancePerPulse = 0;
+    public static DigitalSource kRightEncoderReversed;
   }
 }
