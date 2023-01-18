@@ -1,8 +1,5 @@
 package frc8112.robot.subsystems;
 
-import org.ejml.sparse.csc.misc.ImplCommonOpsWithSemiRing_DSCC;
-
-import edu.wpi.first.wpilibj.Encoder;
 import frc8112.robot.Constants.DriveConstants;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
@@ -25,26 +22,8 @@ public class DriveSubsystem extends SubsystemBase {
     // The robot's drive
     private final DifferentialDrive m_drive = new DifferentialDrive(m_leftMotors, m_rightMotors);
   
-    // The left-side drive encoder
-    private final Encoder m_leftEncoder =
-        new Encoder(
-            DriveConstants.kLeftEncoderPorts[0],
-            DriveConstants.kLeftEncoderPorts[1],
-            DriveConstants.kLeftEncoderReversed);
-  
-    // The right-side drive encoder
-    private final Encoder m_rightEncoder =
-        new Encoder(
-            DriveConstants.kRightEncoderPorts[0],
-            DriveConstants.kRightEncoderPorts[1],
-            DriveConstants.kRightEncoderReversed);
-  
     /** Creates a new DriveSubsystem. */
     public DriveSubsystem() {
-      // Sets the distance per pulse for the encoders
-      m_leftEncoder.setDistancePerPulse(DriveConstants.kEncoderDistancePerPulse);
-      m_rightEncoder.setDistancePerPulse(DriveConstants.kEncoderDistancePerPulse);
-  
       // We need to invert one side of the drivetrain so that positive voltages
       // result in both sides moving forward. Depending on how your robot's
       // gearbox is constructed, you might have to invert the left side instead.
@@ -59,39 +38,6 @@ public class DriveSubsystem extends SubsystemBase {
      */
     public void arcadeDrive(double fwd, double rot) {
       m_drive.arcadeDrive(fwd, rot);
-    }
-  
-    /** Resets the drive encoders to currently read a position of 0. */
-    public void resetEncoders() {
-      m_leftEncoder.reset();
-      m_rightEncoder.reset();
-    }
-  
-    /**
-     * Gets the average distance of the two encoders.
-     *
-     * @return the average of the two encoder readings
-     */
-    public double getAverageEncoderDistance() {
-      return (m_leftEncoder.getDistance() + m_rightEncoder.getDistance()) / 2.0;
-    }
-  
-    /**
-     * Gets the left drive encoder.
-     *
-     * @return the left drive encoder
-     */
-    public Encoder getLeftEncoder() {
-      return m_leftEncoder;
-    }
-  
-    /**
-     * Gets the right drive encoder.
-     *
-     * @return the right drive encoder
-     */
-    public Encoder getRightEncoder() {
-      return m_rightEncoder;
     }
   
     /**
