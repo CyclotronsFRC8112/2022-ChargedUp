@@ -17,11 +17,20 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  public static class DriveConstants {
-    public static final int kLeftMotor1Port = 0;
-    public static final int kLeftMotor2Port = 1;
+  public static class ClawConstants {
+    public static final int kClawMotorPort = 7;
+  }
 
-    public static final int kRightMotor1Port = 3;
-    public static final int kRightMotor2Port = 4;
+  public static class DriveConstants {
+    public static final int kLeftMotor1Port = 1;
+    public static final int kLeftMotor2Port = 6;
+
+    public static final int kRightMotor1Port = 5;
+    public static final int kRightMotor2Port = 2;
+  }
+
+  public static class ElevatorConstants {
+    public static final int kMotorUpPort = 9;
+    public static final int kMotorDownPort = 10;
   }
 }

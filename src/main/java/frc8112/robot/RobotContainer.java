@@ -5,14 +5,15 @@
 package frc8112.robot;
 
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc8112.robot.Constants.OperatorConstants;
-import frc8112.robot.commands.Autos;
-import frc8112.robot.commands.ExampleCommand;
+import frc8112.robot.subsystems.ArmSubsystem;
+import frc8112.robot.subsystems.ClawSubsystem;
 import frc8112.robot.subsystems.DriveSubsystem;
-import frc8112.robot.subsystems.ExampleSubsystem;
+import frc8112.robot.subsystems.ElevatorSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -21,11 +22,11 @@ import frc8112.robot.subsystems.ExampleSubsystem;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
+  private final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
+  private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
+  private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
@@ -37,7 +38,7 @@ public class RobotContainer {
     m_driveSubsystem.setDefaultCommand(
       Commands.run(
         () -> 
-          m_driveSubsystem.arcadeDrive(-m_driverController.getLeftY(), -m_driverController.getRightX()), 
+          m_driveSubsystem.arcadeDrive(-m_driverController.getLeftY(), -m_driverController.getLeftX()), 
       m_driveSubsystem)
       );
   }
@@ -52,13 +53,54 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
-
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    // Elevator Up
+    m_driverController.pov(0).whileTrue(
+      Commands.runEnd(
+        () -> m_elevatorSubsystem.setUpSpeed(0.25), 
+        () -> m_elevatorSubsystem.stop(), 
+        m_elevatorSubsystem
+      )
+    );
+    // Elevator Down
+    m_driverController.pov(180).whileTrue(
+      Commands.runEnd(
+        () -> m_elevatorSubsystem.setDownSpeed(0.25), 
+        () -> m_elevatorSubsystem.stop(), 
+        m_elevatorSubsystem
+      )
+    );
+    // Claw Open
+    m_driverController.pov(270).whileTrue(
+      Commands.runEnd(
+        () -> m_clawSubsystem.open(), 
+        () -> m_clawSubsystem.stop(), 
+        m_clawSubsystem
+      )
+    );
+    // Claw Close
+    m_driverController.pov(90).whileTrue(
+      Commands.runEnd(
+        () -> m_clawSubsystem.close(), 
+        () -> m_clawSubsystem.stop(), 
+        m_clawSubsystem
+      )
+    );
+    // Arm Extend
+    m_driverController.leftTrigger().whileTrue(
+      Commands.runEnd(
+        () -> m_armSubsystem.extend(),
+        () -> m_armSubsystem.stop(),
+        m_armSubsystem
+      )
+    );
+    // Arm Retract
+    m_driverController.rightTrigger().whileTrue(
+      Commands.runEnd(
+        () -> m_armSubsystem.retract(), 
+        () -> m_armSubsystem.stop(), 
+        m_armSubsystem
+      )
+    );
   }
 
   /**
@@ -67,7 +109,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_exampleSubsystem);
+    return new SequentialCommandGroup();
   }
 }
