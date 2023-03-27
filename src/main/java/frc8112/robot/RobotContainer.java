@@ -6,101 +6,72 @@ package frc8112.robot;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+import com.pathplanner.lib.PathPlannerTrajectory;
+
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc8112.robot.Constants.OperatorConstants;
-import frc8112.robot.subsystems.ArmSubsystem;
-import frc8112.robot.subsystems.ClawSubsystem;
 import frc8112.robot.subsystems.DriveSubsystem;
-import frc8112.robot.subsystems.ElevatorSubsystem;
+import frc8112.robot.subsystems.LiftSubsystem;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
   private final DriveSubsystem m_driveSubsystem = new DriveSubsystem();
-  private final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
-  private final ClawSubsystem m_clawSubsystem = new ClawSubsystem();
-  private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
+  private final LiftSubsystem m_liftSubsystem = new LiftSubsystem();
+  private final autoBalance m_autoBalance = new autoBalance();
 
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  private final CommandXboxController m_driverController = new CommandXboxController(
+      OperatorConstants.kDriverControllerPort);
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
 
+    // m_driveSubsystem.setMaxOutput(0.3);
     m_driveSubsystem.setDefaultCommand(
-      Commands.run(
-        () -> 
-          m_driveSubsystem.arcadeDrive(-m_driverController.getLeftY(), -m_driverController.getLeftX()), 
-      m_driveSubsystem)
-      );
+        Commands.run(
+            () -> m_driveSubsystem.arcadeDrive(-m_driverController.getLeftY(), -m_driverController.getLeftX()),
+            m_driveSubsystem));
   }
 
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * Use this method to define your trigger->command mappings. Triggers can be
+   * created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+   * an arbitrary
    * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
+   * {@link
+   * CommandXboxController
+   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or
+   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
   private void configureBindings() {
-    // Elevator Up
-    m_driverController.pov(0).whileTrue(
-      Commands.runEnd(
-        () -> m_elevatorSubsystem.setUpSpeed(0.25), 
-        () -> m_elevatorSubsystem.stop(), 
-        m_elevatorSubsystem
-      )
-    );
-    // Elevator Down
-    m_driverController.pov(180).whileTrue(
-      Commands.runEnd(
-        () -> m_elevatorSubsystem.setDownSpeed(0.25), 
-        () -> m_elevatorSubsystem.stop(), 
-        m_elevatorSubsystem
-      )
-    );
-    // Claw Open
-    m_driverController.pov(270).whileTrue(
-      Commands.runEnd(
-        () -> m_clawSubsystem.open(), 
-        () -> m_clawSubsystem.stop(), 
-        m_clawSubsystem
-      )
-    );
-    // Claw Close
-    m_driverController.pov(90).whileTrue(
-      Commands.runEnd(
-        () -> m_clawSubsystem.close(), 
-        () -> m_clawSubsystem.stop(), 
-        m_clawSubsystem
-      )
-    );
-    // Arm Extend
-    m_driverController.leftTrigger().whileTrue(
-      Commands.runEnd(
-        () -> m_armSubsystem.extend(),
-        () -> m_armSubsystem.stop(),
-        m_armSubsystem
-      )
-    );
-    // Arm Retract
-    m_driverController.rightTrigger().whileTrue(
-      Commands.runEnd(
-        () -> m_armSubsystem.retract(), 
-        () -> m_armSubsystem.stop(), 
-        m_armSubsystem
-      )
-    );
+    // Lift Up
+    m_driverController.y().whileTrue(
+        m_liftSubsystem.getRaiseCommand());
+    // Lift Down
+    m_driverController.a().whileTrue(
+        m_liftSubsystem.getLowerCommand());
   }
 
   /**
@@ -109,6 +80,26 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return new SequentialCommandGroup();
+    // PathConstraints constraints = new PathConstraints(10, 9);
+    // PathPlannerTrajectory path = PathPlanner.loadPath("New New New Path", constraints);
+
+    // return m_driveSubsystem.followTrajectoryCommand(path, true);
+    int autonomousMode = 0;
+
+    switch(autonomousMode) {
+      case 0:
+        return Commands.run(() -> m_driveSubsystem.set(m_autoBalance.autoBalanceRoutine(), m_autoBalance.autoBalanceRoutine()), m_driveSubsystem);
+      case 1:
+        return m_driveSubsystem.getDriveCommand(0.45).withTimeout(2);
+    }
+
+    return null;
+    /*return new SequentialCommandGroup(
+      m_driveSubsystem.getDriveCommand(0.45)-
+        .withTimeout(1.5),
+      new WaitCommand(2),
+      m_driveSubsystem.getDriveCommand(-0.45)
+        .withTimeout(1)
+    );*/
   }
 }

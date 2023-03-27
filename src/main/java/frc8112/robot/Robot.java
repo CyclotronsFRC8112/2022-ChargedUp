@@ -4,9 +4,14 @@
 
 package frc8112.robot;
 
+import com.revrobotics.CANSparkMax.IdleMode;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc8112.robot.Constants.DriveConstants;
+import frc8112.robot.subsystems.DriveSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -48,7 +53,15 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    DriveConstants.lM1.setIdleMode(IdleMode.kCoast);
+    DriveConstants.lM2.setIdleMode(IdleMode.kCoast);
+    DriveConstants.rM1.setIdleMode(IdleMode.kCoast);
+    DriveConstants.rM2.setIdleMode(IdleMode.kCoast);
+    if (m_autonomousCommand != null) {
+      m_autonomousCommand.cancel();
+    }
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -56,6 +69,11 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    DriveConstants.lM1.setIdleMode(IdleMode.kBrake);
+    DriveConstants.lM2.setIdleMode(IdleMode.kBrake);
+    DriveConstants.rM1.setIdleMode(IdleMode.kBrake);
+    DriveConstants.rM2.setIdleMode(IdleMode.kBrake);
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -66,7 +84,12 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    /*DriveConstants.lM1.set(speed);
+    DriveConstants.lM2.set(speed);
+    DriveConstants.rM1.set(speed);
+    DriveConstants.rM2.set(speed);*/
+  }
 
   @Override
   public void teleopInit() {
